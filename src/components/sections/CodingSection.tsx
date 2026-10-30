@@ -1,0 +1,95 @@
+"use client";
+
+import React, { useRef } from "react";
+import { ExternalLink, CheckCircle2 } from "lucide-react";
+import { CODING_PROFILES } from "@/data/coding";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+
+export function CodingSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { playClick, playHover } = useSoundEffects();
+
+  return (
+    <section
+      id="coding"
+      className="relative min-h-screen w-full py-24 px-4 sm:px-8 lg:px-12 flex flex-col justify-center overflow-hidden border-t border-white/5 bg-black"
+      aria-label="Coding & Verified Platforms"
+    >
+      <div className="max-w-7xl mx-auto w-full flex flex-col gap-12 relative z-10">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:gap-4 border-b border-white/10 pb-6">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#828795] uppercase tracking-widest">
+            <span className="text-[#38bdf8] font-bold">03 -</span> CODING ARSENAL
+          </div>
+          <div className="flex flex-col">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif text-[#f2f4ec] font-normal tracking-tight">
+              Engineering craft.
+            </h2>
+          </div>
+        </div>
+
+        {/* 2-Column: Seamlessly Blended Video + Minimalist Coding Tools */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-14 items-center">
+          {/* Left: Video Showcase seamlessly integrated without any box or edge */}
+          <div className="lg:col-span-7 flex justify-center lg:justify-start w-full">
+            <div className="relative w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px] aspect-[720/960] flex items-center justify-center">
+              <video
+                ref={videoRef}
+                src="https://cdn.recent.design/items/4m1bbar/0/720x960.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                style={{ mixBlendMode: "screen" }}
+                className="w-full h-full object-cover pointer-events-none select-none [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)]"
+              >
+                <source src="/videos/coding-terminal.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
+          {/* Right: Coding Tools — Just Name and Link */}
+          <div className="lg:col-span-5 flex flex-col justify-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#828795] uppercase tracking-widest font-semibold pb-2 border-b border-white/10">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#38bdf8]" />
+              <span>Verified Platforms & Tools</span>
+            </div>
+
+            <nav aria-label="Coding Profiles" className="flex flex-col divide-y divide-white/10">
+              {CODING_PROFILES.map((profile, idx) => (
+                <a
+                  key={profile.platform}
+                  href={profile.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={playClick}
+                  onMouseEnter={playHover}
+                  className="group py-3.5 sm:py-5 flex items-center justify-between text-[#f2f4ec] hover:text-[#38bdf8] transition-all duration-200"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <span className="text-xs font-mono text-white/20 group-hover:text-[#38bdf8] transition-colors">
+                      0{idx + 1}
+                    </span>
+                    <span className="text-xl sm:text-2xl md:text-3xl font-serif tracking-tight group-hover:translate-x-2 transition-transform duration-200">
+                      {profile.name}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#828795] group-hover:text-[#38bdf8] transition-colors">
+                    <span className="text-[11px] sm:text-xs uppercase tracking-wider opacity-75 group-hover:opacity-100 transition-opacity">
+                      Open
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                  </div>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+

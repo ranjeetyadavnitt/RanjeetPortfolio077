@@ -1,0 +1,414 @@
+"use client";
+
+import React, { useRef, useState, useEffect, useSyncExternalStore } from "react";
+import { SkillItem } from "@/data/skills";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+
+const emptySubscribe = () => () => { };
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
+interface SkillsOrbitalRingProps {
+  skills: SkillItem[];
+  onSelectSkill: (skill: SkillItem) => void;
+  hoveredSkillId: string | null;
+  setHoveredSkillId: (id: string | null) => void;
+  viewMode?: "orbit" | "grid";
+}
+
+export function SkillsOrbitalRing({
+  skills,
+  onSelectSkill,
+  hoveredSkillId,
+  setHoveredSkillId,
+  viewMode = "orbit",
+}: SkillsOrbitalRingProps) {
+  const isMounted = useIsMounted();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [mouseParallax, setMouseParallax] = useState({ x: 0, y: 0 });
+
+  const dragStartX = useRef(0);
+  const lastX = useRef(0);
+  const velocity = useRef(0);
+  const animFrameId = useRef<number | null>(null);
+  const lastTime = useRef<number>(0);
+  const isDraggingRef = useRef(false);
+  const isPausedRef = useRef(false);
+  const hoveredRef = useRef<string | null>(null);
+  const { playHover, playClick } = useSoundEffects();
+
+  // Keep refs in sync with state inside useEffect (not during render)
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+    isPausedRef.current = isPaused;
+    hoveredRef.current = hoveredSkillId;
+  });
+
+  // Responsive radii so "AI+SDE" sits completely and clearly inside the orbit
+  const [radii, setRadii] = useState({ rx: 540, ry: 360, rz: 420 });
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (typeof window === "undefined") return;
+      const width = window.innerWidth;
+      setIsMobileScreen(width < 640);
+
+      if (width < 420) {
+        setRadii({ rx: Math.max(width * 0.44, 160), ry: 130, rz: 160 });
+      } else if (width < 640) {
+        setRadii({ rx: 240, ry: 170, rz: 210 });
+      } else if (width < 1024) {
+        setRadii({ rx: 400, ry: 270, rz: 320 });
+      } else {
+        // Desktop: orbit perfectly encloses "AI+SDE" with ample clearance
+        setRadii({ rx: 540, ry: 360, rz: 420 });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
+  // Continuous animation loop with inertia
+  useEffect(() => {
+    const loop = (now: number) => {
+      const dt = Math.min((now - lastTime.current) / 1000, 0.1);
+      lastTime.current = now;
+
+      if (isDraggingRef.current) {
+        // Being dragged manually - rotation updated in pointer handler
+      } else if (Math.abs(velocity.current) > 0.0005) {
+        // Inertia coasting
+        const vel = velocity.current;
+        setRotation((r) => r + vel);
+        velocity.current *= 0.94; // friction
+      } else if (!isPausedRef.current && !hoveredRef.current) {
+        // Constant orbital rotation speed
+        const delta = 0.12 * dt;
+        setRotation((r) => r + delta);
+      }
+
+      animFrameId.current = requestAnimationFrame(loop);
+    };
+
+    lastTime.current = performance.now();
+    animFrameId.current = requestAnimationFrame(loop);
+
+    return () => {
+      if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
+    };
+  }, []);
+
+  // Pointer drag controls
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only drag on primary button
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    lastX.current = e.clientX;
+    velocity.current = 0;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    // Subtle mouse parallax tilt
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const normX = (e.clientX - rect.left) / rect.width - 0.5;
+      const normY = (e.clientY - rect.top) / rect.height - 0.5;
+      setMouseParallax({
+        x: normX * 8, // degrees
+        y: normY * 6,
+      });
+    }
+
+    if (!isDragging) return;
+    const deltaX = e.clientX - lastX.current;
+    lastX.current = e.clientX;
+
+    // Convert pixel delta to angle radians
+    const angleDelta = (deltaX / radii.rx) * 1.2;
+    setRotation((r) => r + angleDelta);
+    velocity.current = angleDelta * 0.4;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignored if already released
+    }
+  };
+
+  // Short category label helper
+  const getShortCat = (cat: string) => {
+    switch (cat) {
+      case "Programming Languages":
+        return "LANG";
+      case "AI/ML":
+        return "AI/ML";
+      case "GenAI/LLMs":
+        return "GENAI";
+      case "Frontend":
+        return "FRONTEND";
+      case "Backend":
+        return "BACKEND";
+      case "Databases":
+        return "DATA";
+      case "DevOps/Cloud":
+        return "CLOUD";
+      case "Developer Tools":
+        return "TOOLS";
+      default:
+        return "CORE";
+    }
+  };
+
+  // If in Grid view mode (Optimized for Mobile & Desktop Touch UI):
+  if (viewMode === "grid") {
+    return (
+      <div className="w-full max-w-6xl mx-auto py-4 sm:py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3.5 px-1 sm:px-2">
+        {skills.map((skill) => {
+          const isHovered = hoveredSkillId === skill.id;
+          return (
+            <div
+              key={skill.id}
+              onClick={() => {
+                playClick();
+                onSelectSkill(skill);
+              }}
+              onMouseEnter={() => {
+                playHover();
+                setHoveredSkillId(skill.id);
+              }}
+              onMouseLeave={() => setHoveredSkillId(null)}
+              className={`group cursor-pointer select-none rounded-xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[84px] sm:min-h-[88px] transition-all duration-200 border touch-manipulation active:scale-[0.97] ${isHovered
+                ? "bg-[#0f172a] border-[#38bdf8] scale-[1.03] shadow-[0_0_24px_rgba(56,189,248,0.25)] ring-1 ring-[#38bdf8]/50"
+                : "bg-[#0b0f19]/90 border-white/10 hover:border-sky-400/30 hover:bg-[#0e1626]"
+                }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono tracking-wider text-[#94a3b8] uppercase font-semibold">
+                  {getShortCat(skill.category)}
+                </span>
+                <span
+                  className="w-2 h-2 rounded-full ring-2 ring-white/10"
+                  style={{
+                    backgroundColor: skill.color,
+                    boxShadow: `0 0 10px ${skill.color}`,
+                  }}
+                />
+              </div>
+              <div className="text-[12.5px] sm:text-[13px] font-display font-medium text-[#f8fafc] tracking-tight leading-snug line-clamp-2 my-1">
+                {skill.name}
+              </div>
+              <div className="flex items-center justify-between text-[8.5px] font-mono text-[#94a3b8]">
+                {skill.isCore ? (
+                  <span className="text-[#38bdf8] bg-[#38bdf8]/15 px-1.5 py-0.5 rounded border border-[#38bdf8]/30 font-semibold tracking-wide">
+                    CORE
+                  </span>
+                ) : (
+                  <span className="text-slate-400">ACTIVE</span>
+                )}
+                <span className="text-slate-400">
+                  {skill.relatedProjects.length > 0
+                    ? `${skill.relatedProjects.length} PROJ`
+                    : "STABLE"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // 3D ORBIT MODE (EXACT VIDEO MATCH)
+  const count = skills.length;
+
+  // Prevent SSR hydration mismatch by rendering static container until client mounted
+  if (!isMounted) {
+    return (
+      <div
+        className="relative w-full h-[540px] sm:h-[620px] md:h-[660px] flex items-center justify-center select-none overflow-visible"
+        style={{
+          perspective: "1300px",
+          perspectiveOrigin: "50% 50%",
+        }}
+      >
+        <div
+          className="relative w-0 h-0"
+          style={{
+            transformStyle: "preserve-3d",
+            transform: "rotateX(48deg) rotateZ(-16deg)",
+          }}
+        >
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.04] pointer-events-none"
+            style={{
+              width: `${radii.rx * 2}px`,
+              height: `${radii.ry * 2}px`,
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      className="relative w-full h-[540px] sm:h-[620px] md:h-[660px] flex items-center justify-center select-none cursor-grab active:cursor-grabbing overflow-visible"
+      style={{
+        perspective: "1300px",
+        perspectiveOrigin: "50% 50%",
+      }}
+    >
+      {/* 3D Tilted Ring Plane */}
+      <div
+        className="relative w-0 h-0 transition-transform duration-75 ease-out"
+        style={{
+          transformStyle: "preserve-3d",
+          transform: `rotateX(${48 + mouseParallax.y}deg) rotateZ(${-16 + mouseParallax.x
+            }deg)`,
+        }}
+      >
+        {/* Subtle elliptical orbit guide ring */}
+        <div
+          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.04] pointer-events-none"
+          style={{
+            width: `${radii.rx * 2}px`,
+            height: `${radii.ry * 2}px`,
+          }}
+        />
+
+        {/* Small Size Skill Boxes distributed along the 3D Orbit */}
+        {skills.map((skill, index) => {
+          const angle = (rotation + (index * 2 * Math.PI) / count) % (2 * Math.PI);
+          const x = radii.rx * Math.cos(angle);
+          const y = radii.ry * Math.sin(angle);
+
+          // Calculate depth: larger y is closer to viewer in tilted plane
+          const sinA = Math.sin(angle);
+          // Scale from ~0.82 in the back to ~1.04 in the front
+          const depthScale = 0.82 + (sinA + 1) * 0.11;
+          const depthOpacity = 0.55 + (sinA + 1) * 0.225;
+          const zIndex = Math.round((sinA + 1) * 50);
+
+          // Tangent angle in degrees to tilt the card along the ellipse curve
+          const tangentRad = Math.atan2(
+            radii.ry * Math.cos(angle),
+            -radii.rx * Math.sin(angle)
+          );
+          const tangentDeg = (tangentRad * 180) / Math.PI;
+
+          const isHovered = hoveredSkillId === skill.id;
+          const cardW = isMobileScreen ? 98 : 124;
+          const cardH = isMobileScreen ? 64 : 82;
+
+          return (
+            <div
+              key={skill.id}
+              suppressHydrationWarning
+              onClick={(e) => {
+                e.stopPropagation();
+                playClick();
+                onSelectSkill(skill);
+              }}
+              onMouseEnter={() => {
+                playHover();
+                setHoveredSkillId(skill.id);
+                setIsPaused(true);
+              }}
+              onMouseLeave={() => {
+                setHoveredSkillId(null);
+                setIsPaused(false);
+              }}
+              className="absolute left-0 top-0 cursor-pointer pointer-events-auto group"
+              style={{
+                width: `${cardW}px`,
+                height: `${cardH}px`,
+                marginLeft: `-${cardW / 2}px`,
+                marginTop: `-${cardH / 2}px`,
+                zIndex: isHovered ? 999 : zIndex,
+                transformStyle: "preserve-3d",
+                transform: `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${isHovered ? 50 : 0
+                  }px) rotateZ(${(tangentDeg * 0.5).toFixed(2)}deg) rotateX(-48deg) scale(${isHovered ? (depthScale * 1.18).toFixed(3) : depthScale.toFixed(3)
+                  })`,
+                opacity: isHovered ? 1 : Number(depthOpacity.toFixed(3)),
+                transition: isDragging
+                  ? "none"
+                  : "transform 0.15s ease-out, opacity 0.15s ease-out",
+              }}
+            >
+              {/* The Small Size Box UI */}
+              <div
+                className={`w-full h-full rounded-lg p-2.5 flex flex-col justify-between transition-all duration-300 border backdrop-blur-md ${isHovered
+                  ? "bg-[#181a24] border-[#38bdf8] shadow-[0_0_24px_rgba(56,189,248,0.35)]"
+                  : "bg-[#121319]/95 border-white/10 group-hover:border-white/30"
+                  }`}
+              >
+                {/* Top: Category Tag + Skill Color Dot */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[8px] font-mono tracking-wider text-[#828795] uppercase truncate max-w-[80px]">
+                    {getShortCat(skill.category)}
+                  </span>
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      backgroundColor: skill.color,
+                      boxShadow: `0 0 6px ${skill.color}`,
+                    }}
+                  />
+                </div>
+
+                {/* Center: Skill Name in sharp micro-typography */}
+                <div className="my-auto">
+                  <div className="text-[12px] font-mono font-medium text-[#f2f4ec] tracking-tight leading-tight truncate">
+                    {skill.name}
+                  </div>
+                </div>
+
+                {/* Bottom: CORE badge & project indicator */}
+                <div className="flex items-center justify-between text-[7.5px] font-mono">
+                  {skill.isCore ? (
+                    <span className="px-1.5 py-0.2 rounded bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 font-semibold tracking-wider">
+                      CORE
+                    </span>
+                  ) : (
+                    <span className="text-[#828795] tracking-wider">SYSTEM</span>
+                  )}
+                  <span className="text-[#828795]">
+                    {skill.relatedProjects.length > 0
+                      ? `${skill.relatedProjects.length}P`
+                      : "SPEC"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+

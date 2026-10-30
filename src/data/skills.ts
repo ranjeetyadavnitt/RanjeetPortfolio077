@@ -1,0 +1,408 @@
+export type SkillCategory =
+  | "Programming Languages"
+  | "DSA & Problem Solving"
+  | "AI & Machine Learning"
+  | "Generative AI & LLMs"
+  | "Backend Development"
+  | "Frontend Development"
+  | "Databases & Cloud"
+  | "Core CS & System Design";
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  category: SkillCategory;
+  description: string;
+  relatedProjects: string[];
+  isCore: boolean;
+  color: string;
+}
+
+export const SKILL_CATEGORIES: SkillCategory[] = [
+  "Programming Languages",
+  "DSA & Problem Solving",
+  "AI & Machine Learning",
+  "Generative AI & LLMs",
+  "Backend Development",
+  "Frontend Development",
+  "Databases & Cloud",
+  "Core CS & System Design",
+];
+
+export const SKILLS_DATA: SkillItem[] = [
+  // ── Programming Languages ──
+  {
+    id: "lang-cpp",
+    name: "C++",
+    category: "Programming Languages",
+    description: "Systems programming, competitive coding, algorithms, and OOP fundamentals.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#00599C",
+  },
+  {
+    id: "lang-c",
+    name: "C",
+    category: "Programming Languages",
+    description: "Procedural programming, memory management, pointers, and foundational computation.",
+    relatedProjects: [],
+    isCore: false,
+    color: "#A8B9CC",
+  },
+  {
+    id: "lang-python",
+    name: "Python",
+    category: "Programming Languages",
+    description: "ML pipelines, multi-agent frameworks, FastAPI backend services, and automated data processing.",
+    relatedProjects: ["proj-1", "proj-3"],
+    isCore: true,
+    color: "#3776AB",
+  },
+  {
+    id: "lang-js",
+    name: "JavaScript",
+    category: "Programming Languages",
+    description: "Modern ES6+ web applications, asynchronous asynchronous I/O, Node.js, and client-side logic.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#F7DF1E",
+  },
+  {
+    id: "lang-ts",
+    name: "TypeScript",
+    category: "Programming Languages",
+    description: "Strict compile-time type safety, scalable interfaces, and enterprise full-stack development.",
+    relatedProjects: ["proj-1", "proj-2"],
+    isCore: true,
+    color: "#3178C6",
+  },
+  {
+    id: "lang-java",
+    name: "Java Basics",
+    category: "Programming Languages",
+    description: "Core object-oriented concepts, JVM fundamentals, multithreading, and enterprise backend patterns.",
+    relatedProjects: [],
+    isCore: false,
+    color: "#ED8B00",
+  },
+
+  // ── DSA & Problem Solving ──
+  {
+    id: "dsa-structures",
+    name: "Data Structures",
+    category: "DSA & Problem Solving",
+    description: "Arrays, Linked Lists, Trees, Graphs, Heaps, Hash Tables, and Disjoint Sets.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#10B981",
+  },
+  {
+    id: "dsa-algorithms",
+    name: "Algorithms & Optimization",
+    category: "DSA & Problem Solving",
+    description: "Dynamic Programming, Graph Traversals (BFS/DFS, Dijkstra), Divide & Conquer, and Greedy algorithms.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#059669",
+  },
+  {
+    id: "dsa-competitive",
+    name: "Competitive Programming",
+    category: "DSA & Problem Solving",
+    description: "High-speed algorithmic problem solving on LeetCode and Codeforces.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#F59E0B",
+  },
+
+  // ── AI & Machine Learning ──
+  {
+    id: "ml-core",
+    name: "Machine Learning",
+    category: "AI & Machine Learning",
+    description: "Supervised & unsupervised learning, classification, regression, and model evaluation metrics.",
+    relatedProjects: ["proj-1", "proj-3"],
+    isCore: true,
+    color: "#EC4899",
+  },
+  {
+    id: "ml-deep-learning",
+    name: "Deep Learning",
+    category: "AI & Machine Learning",
+    description: "Multi-layer perceptrons, backpropagation, convolutional networks, and sequential modeling.",
+    relatedProjects: ["proj-3"],
+    isCore: true,
+    color: "#8B5CF6",
+  },
+  {
+    id: "cv-yolo",
+    name: "YOLOv11 & Computer Vision",
+    category: "AI & Machine Learning",
+    description: "Real-time object detection, bounding box regression, and high-framerate visual perception.",
+    relatedProjects: ["proj-3"],
+    isCore: true,
+    color: "#00B4D8",
+  },
+  {
+    id: "cv-opencv",
+    name: "OpenCV",
+    category: "AI & Machine Learning",
+    description: "Image processing, video frame extraction, facial landmark detection, and spatial transformations.",
+    relatedProjects: ["proj-3"],
+    isCore: true,
+    color: "#5C3EE8",
+  },
+  {
+    id: "dl-tensorflow",
+    name: "TensorFlow & Keras",
+    category: "AI & Machine Learning",
+    description: "Deep neural network architecture design, model training, checkpointing, and inference optimization.",
+    relatedProjects: ["proj-3"],
+    isCore: true,
+    color: "#FF6F00",
+  },
+  {
+    id: "dl-lstm",
+    name: "LSTM & Sequential Models",
+    category: "AI & Machine Learning",
+    description: "Recurrent neural networks and Long Short-Term Memory units for temporal risk assessment.",
+    relatedProjects: ["proj-3"],
+    isCore: true,
+    color: "#6366F1",
+  },
+  {
+    id: "dl-efficientnet",
+    name: "EfficientNet",
+    category: "AI & Machine Learning",
+    description: "Compound coefficient scaled CNN backbone architectures for feature extraction.",
+    relatedProjects: ["proj-3"],
+    isCore: false,
+    color: "#14B8A6",
+  },
+
+  // ── Generative AI & LLMs ──
+  {
+    id: "genai-llm",
+    name: "Large Language Models (LLMs)",
+    category: "Generative AI & LLMs",
+    description: "Transformer architectures, zero-shot and few-shot prompt orchestration, and structured generation.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#A855F7",
+  },
+  {
+    id: "genai-rag",
+    name: "Retrieval-Augmented Generation (RAG)",
+    category: "Generative AI & LLMs",
+    description: "Semantic search, chunking strategies, vector embeddings, and context-injected reasoning.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#C084FC",
+  },
+  {
+    id: "genai-multiagent",
+    name: "Multi-Agent Systems",
+    category: "Generative AI & LLMs",
+    description: "Autonomous cooperative agent networks with specialized roles, critique loops, and shared state.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#E879F9",
+  },
+  {
+    id: "genai-langgraph",
+    name: "LangGraph",
+    category: "Generative AI & LLMs",
+    description: "Cyclic computational graphs, state machines, and multi-agent coordination pipelines.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#9333EA",
+  },
+  {
+    id: "genai-langchain",
+    name: "LangChain",
+    category: "Generative AI & LLMs",
+    description: "Chains, retrieval tools, document loaders, and contextual memory primitives.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#1C3C3C",
+  },
+  {
+    id: "genai-faiss",
+    name: "FAISS Vector Database",
+    category: "Generative AI & LLMs",
+    description: "High-dimensional vector similarity indexing, L2 / cosine distance clustering, and sub-millisecond retrieval.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#0284C7",
+  },
+  {
+    id: "genai-ollama",
+    name: "Ollama Local LLM Runtimes",
+    category: "Generative AI & LLMs",
+    description: "Local model quantization, inference execution, and open-weights model deployment.",
+    relatedProjects: ["proj-1"],
+    isCore: false,
+    color: "#475569",
+  },
+
+  // ── Backend Development ──
+  {
+    id: "back-fastapi",
+    name: "FastAPI",
+    category: "Backend Development",
+    description: "Asynchronous Python web framework with Pydantic validation, OpenAPI specs, and high throughput.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#009688",
+  },
+  {
+    id: "back-nodejs",
+    name: "Node.js",
+    category: "Backend Development",
+    description: "V8 non-blocking event-driven runtime for microservices and backend API servers.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#339933",
+  },
+  {
+    id: "back-express",
+    name: "Express.js",
+    category: "Backend Development",
+    description: "RESTful routing, middleware pipelines, authentication gates, and scalable HTTP servers.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#68A063",
+  },
+  {
+    id: "back-rest",
+    name: "RESTful APIs & Microservices",
+    category: "Backend Development",
+    description: "Contract design, RBAC authorization, rate limiting, and structured JSON payloads.",
+    relatedProjects: ["proj-1", "proj-2"],
+    isCore: true,
+    color: "#3B82F6",
+  },
+  {
+    id: "back-auth",
+    name: "JWT & OAuth Security",
+    category: "Backend Development",
+    description: "Stateless JSON Web Tokens, Google OAuth 2.0 federation, and Brevo OTP verification.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#F43F5E",
+  },
+
+  // ── Frontend Development ──
+  {
+    id: "front-react",
+    name: "React",
+    category: "Frontend Development",
+    description: "Component hierarchy, custom hooks, reconciliation, concurrent rendering, and clean UI state.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#61DAFB",
+  },
+  {
+    id: "front-vite",
+    name: "Vite",
+    category: "Frontend Development",
+    description: "Next-generation frontend tooling with instant HMR and optimized production bundles.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#646CFF",
+  },
+  {
+    id: "front-html-css",
+    name: "HTML5 & CSS3",
+    category: "Frontend Development",
+    description: "Semantic document markup, CSS Grid, Flexbox, responsive layouts, and cross-browser styling.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#E34F26",
+  },
+
+  // ── Databases & Cloud ──
+  {
+    id: "db-postgresql",
+    name: "PostgreSQL",
+    category: "Databases & Cloud",
+    description: "Relational database modeling, complex indexing, ACID transactions, and semantic memory storage.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#4169E1",
+  },
+  {
+    id: "db-dynamodb",
+    name: "AWS DynamoDB",
+    category: "Databases & Cloud",
+    description: "Fully managed NoSQL key-value and document database optimized for single-digit millisecond latency.",
+    relatedProjects: ["proj-2"],
+    isCore: true,
+    color: "#4053D6",
+  },
+  {
+    id: "db-sql",
+    name: "SQL & Relational Databases",
+    category: "Databases & Cloud",
+    description: "Schema design, joins, subqueries, normalization, and relational integrity constraints.",
+    relatedProjects: ["proj-1"],
+    isCore: true,
+    color: "#00758F",
+  },
+  {
+    id: "cloud-git",
+    name: "Git & GitHub",
+    category: "Databases & Cloud",
+    description: "Distributed version control, branch workflows, pull requests, CI/CD, and repository architecture.",
+    relatedProjects: ["proj-1", "proj-2", "proj-3"],
+    isCore: true,
+    color: "#F05032",
+  },
+  {
+    id: "tools-dev",
+    name: "Developer Tools (VS Code, Claude Code)",
+    category: "Databases & Cloud",
+    description: "Visual Studio Code, Claude Code, Antigravity AI, Postman, and debugging suites.",
+    relatedProjects: [],
+    isCore: false,
+    color: "#007ACC",
+  },
+
+  // ── Core CS & System Design ──
+  {
+    id: "core-oop",
+    name: "Object-Oriented Programming (OOP)",
+    category: "Core CS & System Design",
+    description: "Encapsulation, inheritance, polymorphism, abstraction, design patterns, and SOLID principles.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#8B5CF6",
+  },
+  {
+    id: "core-dbms",
+    name: "Database Management Systems (DBMS)",
+    category: "Core CS & System Design",
+    description: "Transactions, concurrency control, locking protocols, query parsing, and B+ tree indexing.",
+    relatedProjects: ["proj-1", "proj-2"],
+    isCore: true,
+    color: "#0284C7",
+  },
+  {
+    id: "core-os",
+    name: "Operating Systems (OS)",
+    category: "Core CS & System Design",
+    description: "Processes, threads, CPU scheduling, virtual memory paging, synchronization primitives, and deadlocks.",
+    relatedProjects: [],
+    isCore: true,
+    color: "#475569",
+  },
+  {
+    id: "core-system-design",
+    name: "System Design",
+    category: "Core CS & System Design",
+    description: "Distributed systems architecture, caching, load balancing, horizontal scaling, and fault tolerance.",
+    relatedProjects: ["proj-1", "proj-2"],
+    isCore: true,
+    color: "#F97316",
+  },
+];
